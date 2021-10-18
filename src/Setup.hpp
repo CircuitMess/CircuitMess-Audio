@@ -22,3 +22,7 @@ but if you're compiling for a board that doesn't have them defined, you can do s
 #ifndef BUFFER_SIZE
 #define BUFFER_SIZE	(BUFFER_SAMPLES * BYTES_PER_SAMPLE * NUM_CHANNELS)
 #endif
+
+#ifndef DAC_TIMER
+#define DAC_TIMER 1
+#endif
