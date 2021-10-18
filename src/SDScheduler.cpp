@@ -33,8 +33,6 @@ void SDScheduler::loop(uint micros) {
 }
 
 void SDScheduler::doJob(SDJob* job){
-	SPI.setFrequency(60000000);
-
 	if(job->type == SDJob::SD_SEEK){
 		bool success = job->file.seek(job->size);
 
