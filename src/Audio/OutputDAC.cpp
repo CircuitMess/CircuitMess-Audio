@@ -1,6 +1,7 @@
 #include "OutputDAC.h"
 #include "../Setup.hpp"
 #include "../PerfMon.h"
+#include <soc/sens_reg.h>
 
 #define TIMER DAC_TIMER
 
