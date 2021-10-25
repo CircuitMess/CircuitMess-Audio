@@ -26,3 +26,22 @@ but if you're compiling for a board that doesn't have them defined, you can do s
 #ifndef DAC_TIMER
 #define DAC_TIMER 1
 #endif
+
+
+// AAC decoder settings
+
+#ifndef AAC_READ_BUFFER
+#define AAC_READ_BUFFER 1024 * 8 // Read buffer size
+#endif
+
+#ifndef AAC_READ_CHUNK
+#define AAC_READ_CHUNK 1024 * 2 // Read chunk size, should be bigger than min. decoder input
+#endif
+
+#ifndef AAC_DECODE_MIN_INPUT
+#define AAC_DECODE_MIN_INPUT 1024 // Min. decoder input in
+#endif
+
+#ifndef AAC_OUT_BUFFER
+#define AAC_OUT_BUFFER 1024 * 4 // Decoder output buffer size
+#endif

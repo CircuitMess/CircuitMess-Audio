@@ -1,10 +1,6 @@
 #include "SourceAAC.h"
 #include "../PerfMon.h"
-
-#define AAC_READ_BUFFER 1024 * 64
-#define AAC_READ_CHUNK 1024 * 4 // should be bigger than min input
-#define AAC_DECODE_MIN_INPUT 1024 // should be smaller than read chunk
-#define AAC_OUT_BUFFER 1024 * 4
+#include "../Setup.hpp"
 
 SourceAAC::SourceAAC() :
 		readBuffer(AAC_READ_BUFFER),
@@ -108,7 +104,7 @@ void SourceAAC::processReadJob(){
 	if(readResult == nullptr){
 		if(readBuffer.readAvailable() + fillBuffer.readAvailable() < AAC_DECODE_MIN_INPUT){
 			while(readResult == nullptr){
-				delayMicroseconds(1);
+				vTaskDelay(1);
 			}
 		}else{
 			return;
