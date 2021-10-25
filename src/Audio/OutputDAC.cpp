@@ -107,12 +107,12 @@ void IRAM_ATTR OutputDAC::timerInterrupt(){
 	value = value > 255 ? 255 : value; // clipping
 	value = value < 0 ? 0 : value; // clipping
 
-	dacWrite(output->PIN_OUT, (uint8_t) value);
+	//dacWrite(output->PIN_OUT, (uint8_t) value);
 	// For pin 26
-	/*CLEAR_PERI_REG_MASK(SENS_SAR_DAC_CTRL1_REG, SENS_SW_TONE_EN);
+	CLEAR_PERI_REG_MASK(SENS_SAR_DAC_CTRL1_REG, SENS_SW_TONE_EN);
 	CLEAR_PERI_REG_MASK(SENS_SAR_DAC_CTRL2_REG, SENS_DAC_CW_EN1_M);
 	SET_PERI_REG_BITS(RTC_IO_PAD_DAC1_REG, RTC_IO_PDAC1_DAC, ((uint8_t) value), RTC_IO_PDAC1_DAC_S);
-	SET_PERI_REG_MASK(RTC_IO_PAD_DAC1_REG, RTC_IO_PDAC1_XPD_DAC | RTC_IO_PDAC1_DAC_XPD_FORCE);*/
+	SET_PERI_REG_MASK(RTC_IO_PAD_DAC1_REG, RTC_IO_PDAC1_XPD_DAC | RTC_IO_PDAC1_DAC_XPD_FORCE);
 
 	output->currentSample++;
 }
