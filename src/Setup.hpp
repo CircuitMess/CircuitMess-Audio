@@ -19,12 +19,16 @@ but if you're compiling for a board that doesn't have them defined, you can do s
 #define NUM_CHANNELS 1
 #endif
 
-#ifndef BUFFER_SIZE
 #define BUFFER_SIZE	(BUFFER_SAMPLES * BYTES_PER_SAMPLE * NUM_CHANNELS)
-#endif
+
+// DAC output settings
 
 #ifndef DAC_TIMER
 #define DAC_TIMER 1
+#endif
+
+#ifndef DAC_BUFFERS
+#define DAC_BUFFERS 6
 #endif
 
 

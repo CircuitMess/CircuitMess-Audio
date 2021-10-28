@@ -73,8 +73,10 @@ namespace CMA {
 
 OutputDAC* output = nullptr;
 
-OutputDAC::OutputDAC(int pin_out, int pin_sd) : Output(true), PIN_OUT(pin_out), PIN_SD(pin_sd){
-	samples = static_cast<int16_t*>(malloc(BUFFER_SIZE));
+OutputDAC::OutputDAC(int pin_out, int pin_sd) : Output(false), PIN_OUT(pin_out), PIN_SD(pin_sd), buffer(BUFFER_SIZE * DAC_BUFFERS, true){
+	for(int i = 0; i < DAC_BUFFERS; i++){
+		outputBuffer[i] = static_cast<uint8_t*>(malloc(BUFFER_SIZE / BYTES_PER_SAMPLE));
+	}
 
 	if(timer != nullptr){
 		dis(timer);
@@ -90,43 +92,101 @@ OutputDAC::OutputDAC(int pin_out, int pin_sd) : Output(true), PIN_OUT(pin_out), 
 OutputDAC::~OutputDAC(){
 	dis(timer);
 	timerEnd(timer);
-	free(samples);
 	::output = nullptr;
+	for(int i = 0; i < DAC_BUFFERS; i++){
+		free(outputBuffer[i]);
+	}
 }
 
-// #include "soc/sens_reg.h"
+void OutputDAC::output(size_t numSamples){
+	size_t size = numSamples * BYTES_PER_SAMPLE * NUM_CHANNELS;
+
+	Profiler.start("Buffer wait");
+	while(buffer.writeAvailable() < size){
+		transferBuffer();
+		delayMicroseconds(1);
+	}
+	Profiler.end();
+
+	memcpy(buffer.writeData(), inBuffer, size);
+	buffer.writeMove(size);
+
+	Profiler.start("Buffer transfer");
+	transferBuffer();
+	Profiler.end();
+
+	if(!bufferStatus[currentBuffer]){
+		currentBuffer = (currentBuffer + 1) % DAC_BUFFERS;
+	}
+
+	/*currentSample = BUFFER_SAMPLES;
+	memcpy(samples, inBuffer, numSamples * BYTES_PER_SAMPLE * NUM_CHANNELS);
+	this->numSamples = numSamples;
+	currentSample = 0;*/
+}
+
+void OutputDAC::transferBuffer(){
+	uint8_t target = currentBuffer;
+	for(int i = 0; i < DAC_BUFFERS-1; i++){
+		target = (target + 1) % DAC_BUFFERS;
+		if(!bufferStatus[target]) break;
+	}
+
+	if(bufferStatus[target]) return;
+
+	printf("Current %d, target: %d\n", currentBuffer, target);
+
+	size_t samples = min(BUFFER_SAMPLES, (int) floor(buffer.readAvailable() / BYTES_PER_SAMPLE));
+	if(samples == 0) return;
+
+	for(int i = 0; i < samples; i++){
+		double value = *reinterpret_cast<const int16_t*>(buffer.readData());
+		buffer.readMove(BYTES_PER_SAMPLE);
+
+		value *= (double) getGain(); // apply volume [-1, 1]
+		value = value / 257.0 + 127; // bring to [0, 1]
+		value = value > 255 ? 255 : value; // clipping
+		value = value < 0 ? 0 : value; // clipping
+
+		outputBuffer[target][i] = value;
+	}
+
+/*	memcpy(outputBuffer[target], buffer.readData(), samples * BYTES_PER_SAMPLE);
+	buffer.readMove(samples * BYTES_PER_SAMPLE);*/
+
+	bufferSamples[target] = samples;
+	bufferStatus[target] = true;
+}
+
 void IRAM_ATTR OutputDAC::timerInterrupt(){
 	OutputDAC* output = ::output;
-	if(output == nullptr) return;
-	if(output->currentSample >= BUFFER_SAMPLES || output->currentSample >= output->numSamples) return;
+	if(output == nullptr || output->currentSample == BUFFER_SAMPLES) return;
 
-	double value = (double) output->samples[output->currentSample]; // [-1, 1]
+	uint8_t current = output->currentBuffer;
+	if(!output->bufferStatus[current]) return;
+
+	/*double value = (double) output->outputBuffer[current][output->currentSample]; // [-1, 1]
 	//value /= 3.0; // counter voltage amplification
 	//value /= 3.0; // make sure we don't draw too much current
 	value *= (double) output->getGain(); // apply volume [-1, 1]
 	value = value / 257.0 + 127; // bring to [0, 1]
 	value = value > 255 ? 255 : value; // clipping
-	value = value < 0 ? 0 : value; // clipping
+	value = value < 0 ? 0 : value; // clipping*/
 
 	//dacWrite(output->PIN_OUT, (uint8_t) value);
 	// For pin 26
 	CLEAR_PERI_REG_MASK(SENS_SAR_DAC_CTRL1_REG, SENS_SW_TONE_EN);
 	CLEAR_PERI_REG_MASK(SENS_SAR_DAC_CTRL2_REG, SENS_DAC_CW_EN1_M);
-	SET_PERI_REG_BITS(RTC_IO_PAD_DAC1_REG, RTC_IO_PDAC1_DAC, ((uint8_t) value), RTC_IO_PDAC1_DAC_S);
+	SET_PERI_REG_BITS(RTC_IO_PAD_DAC1_REG, RTC_IO_PDAC1_DAC, output->outputBuffer[current][output->currentSample], RTC_IO_PDAC1_DAC_S);
 	SET_PERI_REG_MASK(RTC_IO_PAD_DAC1_REG, RTC_IO_PDAC1_XPD_DAC | RTC_IO_PDAC1_DAC_XPD_FORCE);
 
 	output->currentSample++;
-}
 
-void OutputDAC::output(size_t numSamples){
-	while(this->currentSample < this->numSamples){
-		delayMicroseconds(1);
+	if(output->currentSample == output->bufferSamples[current]){
+		output->currentBuffer = (output->currentBuffer + 1) % DAC_BUFFERS;
+		output->bufferStatus[current] = false;
+		output->currentSample = 0;
 	}
-
-	currentSample = BUFFER_SAMPLES;
-	memcpy(samples, inBuffer, numSamples * BYTES_PER_SAMPLE * NUM_CHANNELS);
-	this->numSamples = numSamples;
-	currentSample = 0;
 }
 
 void OutputDAC::init(){
@@ -137,8 +197,14 @@ void OutputDAC::init(){
 	dacWrite(PIN_OUT, 127);
 
 	::output = this;
-	currentSample = BUFFER_SAMPLES;
-	numSamples = 0;
+	currentSample = 0;
+	currentBuffer = 0;
+	for(int i = 0; i < DAC_BUFFERS; i++){
+		bufferSamples[i] = 0;
+		bufferStatus[i] = false;
+	}
+	buffer.clear();
+
 	dis(timer);
 	timerAlarmWrite(timer, 1000000 / SAMPLE_RATE, true);
 	timerAlarmEnable(timer);
@@ -153,8 +219,6 @@ void OutputDAC::deinit(){
 		digitalWrite(PIN_SD, HIGH);
 	}
 
-	dacWrite(PIN_OUT, 127);
-
-	numSamples = 0;
+	bufferStatus[currentBuffer] = 0;
 	currentSample = BUFFER_SAMPLES;
 }

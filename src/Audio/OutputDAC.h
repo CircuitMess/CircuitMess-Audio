@@ -4,6 +4,7 @@
 #include "Output.h"
 #include "../Setup.hpp"
 #include <driver/i2s.h>
+#include <Buffer/DataBuffer.h>
 
 class OutputDAC : public Output
 {
@@ -23,9 +24,15 @@ private:
 	int PIN_SD = -1;
 	int PIN_OUT = -1;
 
-	int16_t* samples = nullptr;
+	DataBuffer buffer;
 
-	uint32_t numSamples = 0;
+	uint8_t* outputBuffer[DAC_BUFFERS] = { nullptr };
+	bool bufferStatus[DAC_BUFFERS] = { false }; // True - buffer is filled
+	uint32_t bufferSamples[DAC_BUFFERS] = { 0 };
+	uint8_t currentBuffer = 0;
+
+	void transferBuffer();
+
 	uint32_t currentSample = BUFFER_SAMPLES;
 
 	hw_timer_t* timer = nullptr;
