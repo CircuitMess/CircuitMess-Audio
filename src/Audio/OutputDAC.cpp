@@ -134,8 +134,6 @@ void OutputDAC::transferBuffer(){
 
 	if(bufferStatus[target]) return;
 
-	printf("Current %d, target: %d\n", currentBuffer, target);
-
 	size_t samples = min(BUFFER_SAMPLES, (int) floor(buffer.readAvailable() / BYTES_PER_SAMPLE));
 	if(samples == 0) return;
 

@@ -57,7 +57,6 @@ size_t Oscillator::generate(int16_t* outBuffer){
 
 		for(const auto wave : pending){
 			waves.insert(wave);
-			printf("inserting wave\n");
 		}
 
 		pending.clear();
@@ -87,7 +86,6 @@ size_t Oscillator::generate(int16_t* outBuffer){
 	}
 
 	for(const auto wave : erased){
-		printf("wave done\n");
 		waves.erase(wave);
 		delete wave;
 	}
