@@ -11,6 +11,9 @@ public:
 
 	Wave(uint16_t freq, uint16_t duration, Type type);
 
+	void end();
+	bool isDone() const;
+
 	size_t generate(int16_t* outBuffer) override;
 	int available() override;
 
@@ -23,6 +26,8 @@ private:
 	size_t sampleIndex = 0;
 	size_t count;
 	size_t current = 0;
+
+	bool done = false;
 
 	static double fast_sin(double x);
 

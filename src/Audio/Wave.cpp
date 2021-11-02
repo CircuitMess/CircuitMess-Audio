@@ -48,3 +48,11 @@ int Wave::available(){
 	if(duration == 0) return BUFFER_SAMPLES;
 	else return (int) (count - current);
 }
+
+void Wave::end(){
+	done = true;
+}
+
+bool Wave::isDone() const{
+	return done;
+}

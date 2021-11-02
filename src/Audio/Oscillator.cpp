@@ -19,7 +19,9 @@ void Oscillator::tone(uint16_t freq, uint16_t duration, Wave::Type type){
 }
 
 void Oscillator::noTone(){
-	end = true;
+	for(const auto wave : waves){
+		wave->end();
+	}
 }
 
 int Oscillator::available(){
@@ -41,17 +43,6 @@ int Oscillator::available(){
 }
 
 size_t Oscillator::generate(int16_t* outBuffer){
-	if(end){
-		end = false;
-
-		for(const auto wave : waves){
-			delete wave;
-		}
-
-		waves.clear();
-		return 0;
-	}
-
 	if(!pending.empty()){
 		pendingMutex.lock();
 
@@ -71,6 +62,11 @@ size_t Oscillator::generate(int16_t* outBuffer){
 
 	std::unordered_set<Wave*> erased;
 	for(const auto wave : waves){
+		if(wave->isDone()){
+			erased.insert(wave);
+			continue;
+		}
+
 		memset(waveBuffer, 0, min(BUFFER_SIZE, wave->available()));
 		size_t samples = wave->generate(waveBuffer);
 

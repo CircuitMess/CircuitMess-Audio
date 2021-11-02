@@ -21,7 +21,6 @@ public:
 private:
 	std::unordered_set<Wave*> waves;
 	std::unordered_set<Wave*> pending;
-	bool end = false;
 
 	Mutex pendingMutex;
 
