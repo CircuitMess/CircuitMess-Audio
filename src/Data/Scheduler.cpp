@@ -1,22 +1,19 @@
-#include <SPI.h>
-#include "SDScheduler.h"
+#include "Scheduler.h"
 
-SDScheduler Sched;
-
-SDScheduler::SDScheduler() :jobs(8, sizeof(SDJob*)){
+Scheduler::Scheduler() : jobs(8, sizeof(SchedJob*)){
 
 }
 
-void SDScheduler::addJob(SDJob *job){
+void Scheduler::addJob(SchedJob *job){
 	jobs.send(&job);
 }
 
-void SDScheduler::loop(uint micros) {
+void Scheduler::loop(uint micros) {
 	if (jobs.count() == 0) {
 		return;
 	}
 
-	SDJob* request = nullptr;
+	SchedJob* request = nullptr;
 
 	while(jobs.count() > 0){
 		if(!jobs.receive(&request)){
@@ -32,27 +29,30 @@ void SDScheduler::loop(uint micros) {
 	}
 }
 
-void SDScheduler::doJob(SDJob* job){
-	if(job->type == SDJob::SD_SEEK){
+void Scheduler::doJob(SchedJob* job){
+	beforeJob();
+
+	if(job->type == SchedJob::SEEK){
 		bool success = job->file.seek(job->size);
 
 		if(job->result != nullptr){
-			SDResult* result = new SDResult();
+			SchedResult* result = new SchedResult();
 			result->size = job->size * success;
 			result->buffer = job->buffer;
 			result->error = 0;
 
 			*job->result = result;
 		}
+		afterJob();
 		return;
 	}
 
-	size_t size = job->type == SDJob::SD_READ
+	size_t size = job->type == SchedJob::READ
 				  ? job->file.read(job->buffer, job->size)
 				  : job->file.write(job->buffer, job->size);
 
 	if(job->result != nullptr){
-		SDResult* result = new SDResult();
+		SchedResult* result = new SchedResult();
 
 		result->error = 0;
 		result->buffer = job->buffer;
@@ -60,5 +60,6 @@ void SDScheduler::doJob(SDJob* job){
 
 		*job->result = result;
 	}
+	afterJob();
 }
 

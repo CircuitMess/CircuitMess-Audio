@@ -181,8 +181,8 @@ void OutputAAC::addWriteJob(){
 	if(freeBuffers.empty()) return;
 	uint8_t i = freeBuffers.front();
 
-	Sched.addJob(new SDJob{
-			 .type = SDJob::SD_WRITE,
+	Sched.addJob(new SchedJob{
+			 .type = SchedJob::WRITE,
 			 .file = file,
 			 .size = outBuffers[i]->readAvailable(),
 			 .buffer = const_cast<uint8_t*>(outBuffers[i]->readData()),

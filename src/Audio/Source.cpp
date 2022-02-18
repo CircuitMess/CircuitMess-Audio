@@ -1,5 +1,7 @@
 #include "Source.h"
 
+Source::Source(DataSource& ds) : ds(ds){}
+
 int Source::getBytesPerSample(){
 	return bytesPerSample;
 }

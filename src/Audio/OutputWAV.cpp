@@ -103,8 +103,8 @@ void OutputWAV::addWriteJob(){
 	if(freeBuffers.empty()) return;
 	uint8_t i = freeBuffers.front();
 
-	Sched.addJob(new SDJob{
-			 .type = SDJob::SD_WRITE,
+	Sched.addJob(new SchedJob{
+			 .type = SchedJob::WRITE,
 			 .file = file,
 			 .size = outBuffers[i]->readAvailable(),
 			 .buffer = const_cast<uint8_t*>(outBuffers[i]->readData()),
@@ -146,25 +146,25 @@ void OutputWAV::writeHeaderWAV(size_t size){
 	memcpy(header.data, "data", 4);
 	header.dataSize = size;
 
-	Sched.addJob(new SDJob {
-		.type = SDJob::SD_SEEK,
+	Sched.addJob(new SchedJob {
+		.type = SchedJob::SEEK,
 		.file = file,
 		.size = 0,
 		.buffer = nullptr,
 		.result = nullptr
 	});
 
-	Sched.addJob(new SDJob {
-			.type = SDJob::SD_SEEK,
+	Sched.addJob(new SchedJob {
+			.type = SchedJob::SEEK,
 			.file = file,
 			.size = 0,
 			.buffer = nullptr,
 			.result = nullptr
 	});
 
-	SDResult* result = nullptr;
-	Sched.addJob(new SDJob {
-			.type = SDJob::SD_WRITE,
+	SchedResult* result = nullptr;
+	Sched.addJob(new SchedJob {
+			.type = SchedJob::WRITE,
 			.file = file,
 			.size = sizeof(WavHeader),
 			.buffer = reinterpret_cast<uint8_t*>(&header),

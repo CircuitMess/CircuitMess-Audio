@@ -3,10 +3,12 @@
 
 #include "Generator.h"
 #include <FS.h>
+#include "../Data/DataSource.h"
 
 class Source : public Generator
 {
 public:
+	Source(DataSource &ds);
 	virtual int getBytesPerSample();
 	virtual int getSampleRate();
 	virtual int getChannels();
@@ -21,6 +23,8 @@ protected:
 	uint8_t channels = 0;
 	uint32_t sampleRate = 0;
 	uint8_t bytesPerSample = 0;
+
+	DataSource &ds;
 };
 
 #endif

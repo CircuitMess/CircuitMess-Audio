@@ -6,7 +6,7 @@
 #include <FS.h>
 #include <aacenc_lib.h>
 #include <Buffer/DataBuffer.h>
-#include "../SDScheduler.h"
+#include "../Data/Scheduler.h"
 
 #define OUTFS_DECODE_BUFSIZE 1024 * NUM_CHANNELS // The output buffer size should be 6144 bits per channel excluding the LFE channel.
 #define OUTFS_BUFSIZE 4 * 1024 * NUM_CHANNELS
@@ -37,7 +37,7 @@ private:
 	void setupBuffers();
 
 	bool writePending[OUTFS_BUFCOUNT] = { false };
-	SDResult* writeResult[OUTFS_BUFCOUNT] = { nullptr };
+	SchedResult* writeResult[OUTFS_BUFCOUNT] = {nullptr };
 	void addWriteJob();
 	void processWriteJob();
 
