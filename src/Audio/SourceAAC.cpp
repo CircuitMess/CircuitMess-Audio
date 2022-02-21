@@ -238,8 +238,3 @@ void SourceAAC::resetDecoding() {
 	fillBuffer.clear();
 	AACFlushCodec(hAACDecoder);
 }
-
-void SourceAAC::setRepeat(bool repeat) {
-	SourceAAC::repeat = repeat;
-}
-

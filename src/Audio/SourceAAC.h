@@ -27,7 +27,6 @@ public:
 	uint16_t getElapsed() override;
 	void seek(uint16_t time, fs::SeekMode mode) override;
 
-	void setRepeat(bool repeat);
 	void setSongDoneCallback(void (*callback)());
 
 private:
@@ -45,7 +44,6 @@ private:
 
 	void resetDecoding();
 
-	bool repeat = false;
 	void (*songDoneCallback)() = nullptr;
 };
 
