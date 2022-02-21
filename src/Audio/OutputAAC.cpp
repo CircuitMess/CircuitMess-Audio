@@ -178,7 +178,7 @@ void OutputAAC::deinit(){
 }
 
 void OutputAAC::addWriteJob(){
-	if(freeBuffers.empty()) return;
+/*	if(freeBuffers.empty()) return;
 	uint8_t i = freeBuffers.front();
 
 	Sched.addJob(new SchedJob{
@@ -190,7 +190,7 @@ void OutputAAC::addWriteJob(){
 	 });
 
 	freeBuffers.erase(freeBuffers.begin());
-	writePending[i] = true;
+	writePending[i] = true;*/
 }
 
 void OutputAAC::processWriteJob(){

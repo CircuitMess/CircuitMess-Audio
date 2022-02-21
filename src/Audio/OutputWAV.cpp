@@ -103,6 +103,7 @@ void OutputWAV::addWriteJob(){
 	if(freeBuffers.empty()) return;
 	uint8_t i = freeBuffers.front();
 
+/*
 	Sched.addJob(new SchedJob{
 			 .type = SchedJob::WRITE,
 			 .file = file,
@@ -110,6 +111,7 @@ void OutputWAV::addWriteJob(){
 			 .buffer = const_cast<uint8_t*>(outBuffers[i]->readData()),
 			 .result = &writeResult[i]
 	 });
+*/
 
 	freeBuffers.erase(freeBuffers.begin());
 	writePending[i] = true;
@@ -146,6 +148,7 @@ void OutputWAV::writeHeaderWAV(size_t size){
 	memcpy(header.data, "data", 4);
 	header.dataSize = size;
 
+/*
 	Sched.addJob(new SchedJob {
 		.type = SchedJob::SEEK,
 		.file = file,
@@ -174,6 +177,7 @@ void OutputWAV::writeHeaderWAV(size_t size){
 	while(result == nullptr){
 		delayMicroseconds(1);
 	}
+*/
 
-	delete result;
+//	delete result;
 }
