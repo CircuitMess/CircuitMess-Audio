@@ -13,7 +13,7 @@ size_t FileDataSource::read(uint8_t* buf, size_t size){
 }
 
 size_t FileDataSource::available(){
-	return 0;
+	return file.available();
 }
 
 void FileDataSource::seek(size_t pos, int mode){

@@ -17,3 +17,7 @@ int Source::getChannels(){
 void Source::setVolume(uint8_t volume){
 	Source::volume = (float) volume / 255.0f;
 }
+
+void Source::setRepeat(bool repeat){
+	Source::repeat = repeat;
+}

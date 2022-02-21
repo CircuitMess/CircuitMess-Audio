@@ -105,7 +105,6 @@ size_t SourceMP3::generate(int16_t* outBuffer){
 		// Serial.printf("Grabbing, available %ld, taking %ld\n", readBuffer.readAvailable(), fillBuffer.writeAvailable());
 		//Profiler.start("fill read");
 //		fillBuffer.writeMove(readBuffer.read(fillBuffer.writeData(), fillBuffer.writeAvailable()));
-		refill();
 		if(fillBuffer.readAvailable() < MP3_DECODE_MIN_INPUT){
 			Serial.println("rezerva");
 //			addReadJob();

@@ -134,7 +134,6 @@ size_t SourceAAC::generate(int16_t* outBuffer){
 	while(dataBuffer.readAvailable() < BUFFER_SIZE){
 		// Serial.printf("Grabbing, available %ld, taking %ld\n", readBuffer.readAvailable(), fillBuffer.writeAvailable());
 
-		refill();
 		if(fillBuffer.readAvailable() < AAC_DECODE_MIN_INPUT){
 			refill();
 		}
