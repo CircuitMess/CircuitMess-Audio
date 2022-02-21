@@ -25,16 +25,12 @@ public:
 	void refill();
 	void close() override;
 
-	void setVolume(uint8_t volume);
-
 	const ID3Metadata& getMetadata() const;
 
 private:
 	uint32_t bitrate = 0;
 
 	size_t readData = 0;
-
-	float volume = 1.0f;
 
 	DataBuffer fillBuffer;
 	DataBuffer dataBuffer;

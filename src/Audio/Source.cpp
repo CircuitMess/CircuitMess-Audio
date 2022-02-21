@@ -13,3 +13,7 @@ int Source::getSampleRate(){
 int Source::getChannels(){
 	return channels;
 }
+
+void Source::setVolume(uint8_t volume){
+	Source::volume = (float) volume / 255.0f;
+}

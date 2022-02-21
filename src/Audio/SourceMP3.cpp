@@ -205,9 +205,6 @@ void SourceMP3::close(){
 
 }
 
-void SourceMP3::setVolume(uint8_t volume){
-	SourceMP3::volume = (float) volume / 255.0f;
-}
 
 const ID3Metadata& SourceMP3::getMetadata() const{
 	return metadata;

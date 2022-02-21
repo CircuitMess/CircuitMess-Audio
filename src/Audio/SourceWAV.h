@@ -21,15 +21,11 @@ public:
 
 	void close() override;
 
-	void setVolume(uint8_t volume);
-
 private:
 
 	size_t dataSize;
 	size_t readData = 0;
 	bool readHeader();
-
-	float volume = 1.0f;
 };
 
 

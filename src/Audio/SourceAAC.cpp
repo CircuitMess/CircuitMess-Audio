@@ -232,9 +232,6 @@ void SourceAAC::seek(uint16_t time, fs::SeekMode mode){
 	});*/
 }
 
-void SourceAAC::setVolume(uint8_t volume){
-	SourceAAC::volume = (float) volume / 255.0f;
-}
 
 void SourceAAC::resetDecoding() {
 	dataBuffer.clear();

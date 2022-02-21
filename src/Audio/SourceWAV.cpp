@@ -184,7 +184,3 @@ void SourceWAV::seek(uint16_t time, fs::SeekMode mode){
 void SourceWAV::close(){
 
 }
-
-void SourceWAV::setVolume(uint8_t volume){
-	SourceWAV::volume = (float) volume / 255.0f;
-}

@@ -27,8 +27,6 @@ public:
 	uint16_t getElapsed() override;
 	void seek(uint16_t time, fs::SeekMode mode) override;
 
-	void setVolume(uint8_t volume);
-
 	void setRepeat(bool repeat);
 	void setSongDoneCallback(void (*callback)());
 
@@ -38,7 +36,6 @@ private:
 	size_t dataSize = 0;
 	size_t movedBytes = 0;
 
-	float volume = 1.0f;
 
 	DataBuffer fillBuffer;
 	DataBuffer dataBuffer;
