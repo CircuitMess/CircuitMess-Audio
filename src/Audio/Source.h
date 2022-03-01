@@ -18,6 +18,7 @@ public:
 	virtual void seek(uint16_t time, fs::SeekMode mode) = 0;
 
 	virtual void setVolume(uint8_t volume);
+	uint8_t getVolume() const;
 	void setRepeat(bool repeat);
 
 	virtual void close() = 0;

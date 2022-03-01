@@ -18,6 +18,10 @@ void Source::setVolume(uint8_t volume){
 	Source::volume = (float) volume / 255.0f;
 }
 
+uint8_t Source::getVolume() const{
+	return (uint8_t)(volume * 255.0);
+}
+
 void Source::setRepeat(bool repeat){
 	Source::repeat = repeat;
 }
