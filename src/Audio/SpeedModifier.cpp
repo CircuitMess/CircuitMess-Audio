@@ -10,10 +10,10 @@ SpeedModifier::~SpeedModifier() noexcept{
 }
 
 size_t SpeedModifier::generate(int16_t *outBuffer){
+	if(!source->available()) return 0;
 	if(dataBuffer->readAvailable() < (float) BUFFER_SIZE * 2){
 		fillBuffer();
 	}
-	if(!dataBuffer->readAvailable()) return 0;
 
 	float sourcePtr = remainder;
 	size_t destinationPtr = 0;
