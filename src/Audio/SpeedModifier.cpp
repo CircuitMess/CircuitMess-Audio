@@ -13,6 +13,7 @@ size_t SpeedModifier::generate(int16_t *outBuffer){
 	if(dataBuffer->readAvailable() < (float) BUFFER_SIZE * 2){
 		fillBuffer();
 	}
+	if(!dataBuffer->readAvailable()) return 0;
 
 	float sourcePtr = remainder;
 	size_t destinationPtr = 0;
@@ -44,6 +45,7 @@ void SpeedModifier::setSpeed(float speed){
 void SpeedModifier::fillBuffer(){
 	while(dataBuffer->readAvailable() < BUFFER_SIZE * 2){
 		size_t generated = source->generate(reinterpret_cast<int16_t*>(dataBuffer->writeData()));
+		if(!generated) break;
 		dataBuffer->writeMove(generated * BYTES_PER_SAMPLE * NUM_CHANNELS);
 	}
 }
