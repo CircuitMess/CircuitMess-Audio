@@ -21,11 +21,11 @@ struct WavHeader{
 };
 
 OutputWAV::OutputWAV(){
-	freeBuffers.reserve(OUTWAV_BUFCOUNT);
+/*	freeBuffers.reserve(OUTWAV_BUFCOUNT);
 	for(int i = 0; i < OUTWAV_BUFCOUNT; i++){
 		outBuffers[i] = new DataBuffer(OUTWAV_BUFSIZE);
 		freeBuffers.push_back(i);
-	}
+	}*/
 }
 
 OutputWAV::OutputWAV(const fs::File& file) : OutputWAV(){
@@ -33,9 +33,9 @@ OutputWAV::OutputWAV(const fs::File& file) : OutputWAV(){
 }
 
 OutputWAV::~OutputWAV(){
-	for(auto& outBuffer : outBuffers){
+/*	for(auto& outBuffer : outBuffers){
 		delete outBuffer;
-	}
+	}*/
 }
 
 const fs::File& OutputWAV::getFile() const{
@@ -47,7 +47,7 @@ void OutputWAV::setFile(const fs::File& file){
 }
 
 void OutputWAV::output(size_t numSamples){
-	Profiler.start("WAV write process");
+/*	Profiler.start("WAV write process");
 	processWriteJob();
 	Profiler.end();
 
@@ -67,7 +67,9 @@ void OutputWAV::output(size_t numSamples){
 		Profiler.start("WAV write add");
 		addWriteJob();
 		Profiler.end();
-	}
+	}*/
+	size_t size = numSamples * NUM_CHANNELS * BYTES_PER_SAMPLE;
+	file.write((uint8_t*)inBuffer, size);
 }
 
 void OutputWAV::init(){
@@ -82,7 +84,7 @@ void OutputWAV::init(){
 }
 
 void OutputWAV::deinit(){
-	Serial.println("Stopping WAV");
+/*	Serial.println("Stopping WAV");
 	if(!freeBuffers.empty() && outBuffers[freeBuffers.front()]->readAvailable() > 0){
 		Serial.println("Writing last buffer");
 		addWriteJob();
@@ -92,19 +94,19 @@ void OutputWAV::deinit(){
 
 	while(freeBuffers.size() != OUTWAV_BUFCOUNT){
 		processWriteJob();
-	}
+	}*/
 
 	Serial.println("Writing header");
 
 	writeHeaderWAV(dataLength);
 }
 
-void OutputWAV::addWriteJob(){
+/*void OutputWAV::addWriteJob(){
 	if(freeBuffers.empty()) return;
 	uint8_t i = freeBuffers.front();
 
-	Sched.addJob(new SDJob{
-			 .type = SDJob::SD_WRITE,
+	Sched.addJob(new SchedJob{
+			 .type = SchedJob::WRITE,
 			 .file = file,
 			 .size = outBuffers[i]->readAvailable(),
 			 .buffer = const_cast<uint8_t*>(outBuffers[i]->readData()),
@@ -128,7 +130,7 @@ void OutputWAV::processWriteJob(){
 		writePending[i] = false;
 		freeBuffers.push_back(i);
 	}
-}
+}*/
 
 void OutputWAV::writeHeaderWAV(size_t size){
 	WavHeader header;
@@ -146,34 +148,6 @@ void OutputWAV::writeHeaderWAV(size_t size){
 	memcpy(header.data, "data", 4);
 	header.dataSize = size;
 
-	Sched.addJob(new SDJob {
-		.type = SDJob::SD_SEEK,
-		.file = file,
-		.size = 0,
-		.buffer = nullptr,
-		.result = nullptr
-	});
-
-	Sched.addJob(new SDJob {
-			.type = SDJob::SD_SEEK,
-			.file = file,
-			.size = 0,
-			.buffer = nullptr,
-			.result = nullptr
-	});
-
-	SDResult* result = nullptr;
-	Sched.addJob(new SDJob {
-			.type = SDJob::SD_WRITE,
-			.file = file,
-			.size = sizeof(WavHeader),
-			.buffer = reinterpret_cast<uint8_t*>(&header),
-			.result = &result
-	});
-
-	while(result == nullptr){
-		delayMicroseconds(1);
-	}
-
-	delete result;
+	file.seek(0);
+	file.write(reinterpret_cast<uint8_t*>(&header), sizeof(WavHeader));
 }

@@ -31,9 +31,7 @@ size_t Mixer::generate(int16_t *outBuffer){
 		int16_t* buffer = bufferList[i];
 		if(generator != nullptr && buffer != nullptr){
 			receivedSamples[i] = generator->generate(buffer);
-			if(receivedSamples[i] == 0){
-				pauseList[i] = true;
-			}
+//			pauseList[i] = (receivedSamples[i] == 0);
 		}
 	}
 
@@ -41,7 +39,7 @@ size_t Mixer::generate(int16_t *outBuffer){
 		int32_t wave = 0;
 		for(uint8_t j = 0; j < sourceList.size(); j++){
 			if(pauseList[j]) continue;
-			if(bufferList[j] == nullptr || receivedSamples[j] < i/NUM_CHANNELS) break;
+			if(bufferList[j] == nullptr || receivedSamples[j] < i/NUM_CHANNELS) continue;
 
 			if(sourceList.size() == 2){
 				wave += bufferList[j][i] * (float)((j == 1 ? (float)(mixRatio) : (float)(255.0 - mixRatio))/255.0); //use the mixer if only 2 tracks found
@@ -53,6 +51,7 @@ size_t Mixer::generate(int16_t *outBuffer){
 	}
 	size_t longestBuffer = *std::max_element(receivedSamples.begin(), receivedSamples.end());
 
+/*
 	if(longestBuffer == 0){
 		bool allPaused = true;
 		for(bool p : pauseList){
@@ -63,6 +62,7 @@ size_t Mixer::generate(int16_t *outBuffer){
 			return BUFFER_SAMPLES;
 		}
 	}
+*/
 
 	return longestBuffer;
 }
