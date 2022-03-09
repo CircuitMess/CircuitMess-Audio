@@ -15,7 +15,7 @@ public:
 
 	virtual uint16_t getDuration() = 0;
 	virtual uint16_t getElapsed() = 0;
-	virtual void seek(uint16_t time, fs::SeekMode mode) = 0;
+	virtual void seek(uint16_t time, fs::SeekMode mode = fs::SeekSet) = 0;
 
 	virtual void setVolume(uint8_t volume);
 	uint8_t getVolume() const;
