@@ -70,6 +70,7 @@ size_t Mixer::generate(int16_t *outBuffer){
 int Mixer::available(){
 	int available = 0;
 	for(auto & i : sourceList){
+		if(i == nullptr) continue;
 		available = max(available, i->available());
 	}
 	return available;
