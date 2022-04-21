@@ -1,7 +1,7 @@
 #include "SpeedModifier.h"
 #include "../Setup.hpp"
 
-SpeedModifier::SpeedModifier(Source* source) : source(source){
+SpeedModifier::SpeedModifier(Generator* source) : source(source){
 	dataBuffer = new DataBuffer(BUFFER_SIZE * 3, true);
 }
 
@@ -50,6 +50,6 @@ void SpeedModifier::fillBuffer(){
 	}
 }
 
-void SpeedModifier::setSource(Source* source){
+void SpeedModifier::setSource(Generator* source){
 	SpeedModifier::source = source;
 }
