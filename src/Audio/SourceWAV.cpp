@@ -176,7 +176,7 @@ uint16_t SourceWAV::getElapsed(){
 
 void SourceWAV::seek(uint16_t time, fs::SeekMode mode){
 	if(sampleRate == 0 || channels == 0 || bytesPerSample == 0 ) return;
-	size_t offset = time*sampleRate*channels*bytesPerSample;
+	size_t offset = time*sampleRate*channels*bytesPerSample + sizeof(WavHeader);
 
 	ds.seek(offset, mode);
 }
