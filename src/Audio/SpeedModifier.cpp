@@ -10,7 +10,6 @@ SpeedModifier::~SpeedModifier() noexcept{
 }
 
 size_t SpeedModifier::generate(int16_t *outBuffer){
-	if(!source->available()) return 0;
 	if(dataBuffer->readAvailable() < (float) BUFFER_SIZE * 2){
 		fillBuffer();
 	}
@@ -18,7 +17,7 @@ size_t SpeedModifier::generate(int16_t *outBuffer){
 	float sourcePtr = remainder;
 	size_t destinationPtr = 0;
 
-	while(destinationPtr < BUFFER_SAMPLES && floor(sourcePtr) < dataBuffer->readAvailable()){
+	while(destinationPtr < BUFFER_SAMPLES && floor(sourcePtr) < dataBuffer->readAvailable() / 2){
 		outBuffer[destinationPtr++] = reinterpret_cast<const int16_t*>(dataBuffer->readData())[(int) floor(sourcePtr)];
 		sourcePtr += speed;
 	}
