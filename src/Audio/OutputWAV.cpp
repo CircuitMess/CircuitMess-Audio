@@ -3,23 +3,6 @@
 #include "../Setup.hpp"
 #include "../PerfMon.h"
 
-
-struct WavHeader{
-	char RIFF[4];
-	uint32_t chunkSize;
-	char WAVE[4];
-	char fmt[3];
-	uint32_t fmtSize;
-	uint16_t audioFormat;
-	uint16_t numChannels;
-	uint32_t sampleRate;
-	uint32_t byteRate; // == SampleRate * NumChannels * BitsPerSample/8
-	uint16_t blockAlign; // == NumChannels * BitsPerSample/8
-	uint16_t bitsPerSample;
-	char data[4];
-	uint32_t dataSize; // == NumSamples * NumChannels * BitsPerSample/8
-};
-
 OutputWAV::OutputWAV(){
 /*	freeBuffers.reserve(OUTWAV_BUFCOUNT);
 	for(int i = 0; i < OUTWAV_BUFCOUNT; i++){
@@ -68,6 +51,13 @@ void OutputWAV::output(size_t numSamples){
 		addWriteJob();
 		Profiler.end();
 	}*/
+
+/*
+	for(int i = 0; i < numSamples; i++){
+		printf("%d\n", inBuffer[i]);
+	}
+*/
+
 	size_t size = numSamples * NUM_CHANNELS * BYTES_PER_SAMPLE;
 	file.write((uint8_t*)inBuffer, size);
 }
@@ -133,21 +123,26 @@ void OutputWAV::processWriteJob(){
 }*/
 
 void OutputWAV::writeHeaderWAV(size_t size){
-	WavHeader header;
-	memcpy(header.RIFF, "RIFF", 4);
-	header.chunkSize = size + 36;
-	memcpy(header.WAVE, "WAVE", 4);
-	memcpy(header.fmt, "fmt ", 4);
-	header.fmtSize = 16;
-	header.audioFormat = 1; //PCM
-	header.numChannels = NUM_CHANNELS; //2 channels
-	header.sampleRate = SAMPLE_RATE;
-	header.byteRate = SAMPLE_RATE * NUM_CHANNELS * BYTES_PER_SAMPLE;
-	header.blockAlign = NUM_CHANNELS * BYTES_PER_SAMPLE;
-	header.bitsPerSample = BYTES_PER_SAMPLE * 8;
-	memcpy(header.data, "data", 4);
+	struct HeaderWAV {
+		char RIFF[4] = { 'R', 'I', 'F', 'F' };
+		uint32_t chunkSize = 36;
+		char WAVE[4] = { 'W', 'A', 'V', 'E' };
+		char fmt[4] = { 'f', 'm', 't', ' ' };
+		uint32_t fmtSize = 16;
+		uint16_t audioFormat = 1; // PCM
+		uint16_t numChannels = NUM_CHANNELS;
+		uint32_t sampleRate = SAMPLE_RATE;
+		uint32_t byteRate = SAMPLE_RATE * NUM_CHANNELS * BYTES_PER_SAMPLE;
+		uint16_t blockAlign = NUM_CHANNELS * BYTES_PER_SAMPLE;
+		uint16_t bitsPerSample = BYTES_PER_SAMPLE * 8;
+		char data[4] = { 'd', 'a', 't', 'a' };
+		uint32_t dataSize = 0;
+	};
+
+	HeaderWAV header;
+	header.chunkSize += size;
 	header.dataSize = size;
 
 	file.seek(0);
-	file.write(reinterpret_cast<uint8_t*>(&header), sizeof(WavHeader));
+	file.write(reinterpret_cast<const uint8_t*>(&header), sizeof(HeaderWAV));
 }
