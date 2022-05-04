@@ -30,6 +30,8 @@ public:
 
 	void setSource(Generator* source);
 
+	void resetBuffers();
+
 private:
 	Generator *source = nullptr;
 	DataBuffer* dataBuffer = nullptr;

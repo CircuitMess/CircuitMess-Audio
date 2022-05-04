@@ -52,3 +52,7 @@ void SpeedModifier::fillBuffer(){
 void SpeedModifier::setSource(Generator* source){
 	SpeedModifier::source = source;
 }
+
+void SpeedModifier::resetBuffers(){
+	dataBuffer->clear();
+}
