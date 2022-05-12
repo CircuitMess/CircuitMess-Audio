@@ -50,6 +50,7 @@ void SourceAAC::close(){
 }
 
 int SourceAAC::available(){
+	if(channels == 0 || bytesPerSample == 0 ) return 0;
 	return (ds.available() / (channels * bytesPerSample));
 }
 
@@ -119,12 +120,12 @@ size_t SourceAAC::generate(int16_t* outBuffer){
 	Profiler.end();
 
 	if(fillBuffer.readAvailable() < AAC_DECODE_MIN_INPUT){
-		ds.seek(0);
 		Serial.println("if fillbuffer < aac_decode_min");
 //		if(songDoneCallback != nullptr) {
 //			songDoneCallback();
 //		}
 		if(repeat){
+			ds.seek(0);
 			refill();
 		}else{
 			return 0;
