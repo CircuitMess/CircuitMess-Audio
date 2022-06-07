@@ -1,6 +1,6 @@
 #include "BufferedDataSource.h"
 
-BufferedDataSource::BufferedDataSource(DataSource &ds, size_t bufSize) : ds(ds), bufSize(bufSize), readBuffer(bufSize){
+BufferedDataSource::BufferedDataSource(DataSource& ds, size_t bufSize) : ds(ds), bufSize(bufSize), readBuffer(bufSize){
 	fillBuffer();
 }
 
@@ -12,10 +12,12 @@ size_t BufferedDataSource::available(){
 	return readBuffer.readAvailable();
 }
 
-void BufferedDataSource::seek(size_t pos, int mode){
+bool BufferedDataSource::seek(size_t pos, int mode){
 	readBuffer.clear();
-	ds.seek(pos, mode);
+	if(!ds.seek(pos, mode)) return false;
+
 	fillBuffer();
+	return true;
 }
 
 void BufferedDataSource::fillBuffer(){

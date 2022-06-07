@@ -5,6 +5,7 @@
 #include <vector>
 #include <Loop/LoopListener.h>
 #include <Sync/Queue.h>
+#include "DataSource.h"
 
 struct SchedResult {
 	uint8_t error;
@@ -13,8 +14,8 @@ struct SchedResult {
 };
 
 struct SchedJob {
-	enum { WRITE, READ, SEEK } type;
-	fs::File file;
+	enum { READ, SEEK } type;
+	DataSource& ds;
 	size_t size;
 	uint8_t* buffer;
 	SchedResult** result;

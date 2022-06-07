@@ -35,60 +35,6 @@ SourceMP3::SourceMP3(DataSource& ds) : Source(ds),
 //	addReadJob(true);
 }
 
-/*void SourceMP3::addReadJob(bool full){
-	if(readJobPending) return;
-
-	delete readResult;
-	readResult = nullptr;
-
-	size_t size = full ? readBuffer.writeAvailable() : MP3_READ_CHUNK;
-
-	//Serial.printf("Adding read job, size: %ld\n", size);
-
-	if(size == 0 || readBuffer.writeAvailable() < size){
-		return;
-	}
-
-	uint8_t* buf;
-	if(size <= MP3_READ_CHUNK || !psramFound()){
-		buf = static_cast<uint8_t*>(malloc(size));
-	}else{
-		buf = static_cast<uint8_t*>(ps_malloc(size));
-	}
-
-	Sched.addJob(new SchedJob{
-						 .type = SchedJob::READ,
-						 .file = file,
-						 .size = size,
-						 .buffer = buf,
-						 .result = &readResult
-				 });
-
-	readJobPending = true;
-}
-
-void SourceMP3::processReadJob(){
-	if(readResult == nullptr){
-		if(readBuffer.readAvailable() + fillBuffer.readAvailable() < MP3_DECODE_MIN_INPUT){
-			Serial.println("small");
-			while(readResult == nullptr){
-				delayMicroseconds(1);
-			}
-			Serial.println("ok");
-		}else{
-			return;
-		}
-	}
-
-	readBuffer.write(readResult->buffer, readResult->size);
-	free(readResult->buffer);
-
-	delete readResult;
-	readResult = nullptr;
-
-	readJobPending = false;
-}*/
-
 size_t SourceMP3::generate(int16_t* outBuffer){
 	if(!decoder){
 		Serial.println("Decoder false");

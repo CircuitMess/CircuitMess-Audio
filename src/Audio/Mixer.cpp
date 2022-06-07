@@ -4,7 +4,7 @@
 //clipping wave to avoid overflows
 int16_t clip(int32_t input){ 
 
-    if (input > 0x7FFF) return 0x7FFFF;
+    if (input > 0x7FFF) return 0x7FFF;
     if (input < - 0x7FFF) return -0x7FFF;
     return input;
 }

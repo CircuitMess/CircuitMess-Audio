@@ -1,6 +1,6 @@
 #include "FileDataSource.h"
 
-FileDataSource::FileDataSource(File &file) : file(file){
+FileDataSource::FileDataSource(File& file) : file(file){
 
 }
 
@@ -16,8 +16,8 @@ size_t FileDataSource::available(){
 	return file.available();
 }
 
-void FileDataSource::seek(size_t pos, int mode){
-	file.seek(pos, SeekMode(mode));
+bool FileDataSource::seek(size_t pos, int mode){
+	return file.seek(pos, SeekMode(mode));
 }
 
 size_t FileDataSource::size(){
