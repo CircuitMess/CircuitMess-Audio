@@ -6,11 +6,11 @@
 
 class FileDataSource : public DataSource {
 public:
-	FileDataSource(File &file);
+	FileDataSource(File& file);
 	virtual ~FileDataSource();
 	size_t read(uint8_t* buf, size_t size) override;
 	size_t available() override;
-	void seek(size_t pos, int mode) override;
+	bool seek(size_t pos, int mode) override;
 	size_t size() override;
 
 private:

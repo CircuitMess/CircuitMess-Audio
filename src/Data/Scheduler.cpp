@@ -33,7 +33,7 @@ void Scheduler::doJob(SchedJob* job){
 	beforeJob();
 
 	if(job->type == SchedJob::SEEK){
-		bool success = job->file.seek(job->size);
+		bool success = job->ds.seek(job->size);
 
 		if(job->result != nullptr){
 			SchedResult* result = new SchedResult();
@@ -47,9 +47,11 @@ void Scheduler::doJob(SchedJob* job){
 		return;
 	}
 
-	size_t size = job->type == SchedJob::READ
-				  ? job->file.read(job->buffer, job->size)
-				  : job->file.write(job->buffer, job->size);
+/*	size_t size = job->type == SchedJob::READ
+				  ? job->ds.read(job->buffer, job->size)
+				  : job->ds.write(job->buffer, job->size);*/
+
+	size_t size = job->ds.read(job->buffer, job->size);
 
 	if(job->result != nullptr){
 		SchedResult* result = new SchedResult();

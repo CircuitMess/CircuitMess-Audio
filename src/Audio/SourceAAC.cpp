@@ -29,16 +29,6 @@ void SourceAAC::setSongDoneCallback(void (*callback)()) {
 
 void SourceAAC::close(){
 
-/*	readBuffer.clear();
-	if(readJobPending){
-		while(readResult == nullptr){
-			delayMicroseconds(1);
-		}
-
-		free(readResult->buffer);
-		delete readResult;
-	}*/
-
 	channels = sampleRate = bytesPerSample = bitrate = movedBytes = 0;
 	dataBuffer.clear();
 	fillBuffer.clear();
@@ -53,61 +43,6 @@ int SourceAAC::available(){
 	if(channels == 0 || bytesPerSample == 0 ) return 0;
 	return (ds.available() / (channels * bytesPerSample));
 }
-
-/*
-void SourceAAC::addReadJob(bool full){
-	if(readJobPending) return;
-
-	delete readResult;
-	readResult = nullptr;
-
-	size_t size = full ? readBuffer.writeAvailable() : AAC_READ_CHUNK;
-
-	//Serial.printf("Adding read job, size: %ld\n", size);
-
-	if(size == 0 || readBuffer.writeAvailable() < size){
-		return;
-	}
-
-	uint8_t* buf;
-	if(size <= AAC_READ_CHUNK || !psramFound()){
-		buf = static_cast<uint8_t*>(malloc(size));
-	}else{
-		buf = static_cast<uint8_t*>(ps_malloc(size));
-	}
-
-	Sched.addJob(new SchedJob{
-						 .type = SchedJob::READ,
-						 .file = file,
-						 .size = size,
-						 .buffer = buf,
-						 .result = &readResult
-				 });
-
-	readJobPending = true;
-}
-
-void SourceAAC::processReadJob(){
-	if(readResult == nullptr){
-		if(readBuffer.readAvailable() + fillBuffer.readAvailable() < AAC_DECODE_MIN_INPUT){
-			while(readResult == nullptr){
-				vTaskDelay(1);
-			}
-		}else{
-			return;
-		}
-	}
-
-	readBuffer.write(readResult->buffer, readResult->size);
-	free(readResult->buffer);
-
-	delete readResult;
-	readResult = nullptr;
-
-	readJobPending = false;
-}
-
-*/
 
 size_t SourceAAC::generate(int16_t* outBuffer){
 	if(!hAACDecoder){
@@ -133,7 +68,6 @@ size_t SourceAAC::generate(int16_t* outBuffer){
 	}
 
 	while(dataBuffer.readAvailable() < BUFFER_SIZE){
-		// Serial.printf("Grabbing, available %ld, taking %ld\n", readBuffer.readAvailable(), fillBuffer.writeAvailable());
 
 		if(fillBuffer.readAvailable() < AAC_DECODE_MIN_INPUT){
 			refill();
@@ -210,28 +144,7 @@ void SourceAAC::seek(uint16_t time, fs::SeekMode mode){
 	ds.seek(offset);
 	movedBytes = offset;
 	resetDecoding();
-
-
-	//prebaciti u File implementaciju sa SD bufferanjem u seek()
-/*	if(readJobPending){
-		while (readResult == nullptr){
-			delayMicroseconds(1);
-		}
-
-		free(readResult->buffer);
-		delete readResult;
-		readResult = nullptr;
-		readJobPending = false;
-	}
-	Sched.addJob(new SchedJob{
-			.type = SchedJob::SEEK,
-			.file = file,
-			.size = offset,
-			.buffer = nullptr,
-			.result = nullptr
-	});*/
 }
-
 
 void SourceAAC::resetDecoding() {
 	dataBuffer.clear();

@@ -4,15 +4,15 @@
 #include "DataSource.h"
 #include <Buffer/RingBuffer.h>
 
-class BufferedDataSource : public DataSource{
+class BufferedDataSource : public DataSource {
 public:
-	BufferedDataSource(DataSource &ds, size_t bufSize);
+	BufferedDataSource(DataSource& ds, size_t bufSize);
 	size_t read(uint8_t* buf, size_t size) override;
 	size_t available() override;
-	void seek(size_t pos, int mode) override;
+	bool seek(size_t pos, int mode) override;
 	size_t size() override;
 private:
-	DataSource &ds;
+	DataSource& ds;
 	size_t bufSize = 0;
 	RingBuffer readBuffer;
 
