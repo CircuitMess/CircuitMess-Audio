@@ -11,7 +11,9 @@ void AudioSystem::play(std::initializer_list<Chirp> sound){
 		startMillis = millis();
 		task.start(1, 0);
 	}else{
+		mut.lock();
 		queued = sound;
+		mut.unlock();
 	}
 }
 
@@ -21,7 +23,9 @@ void AudioSystem::play(const Sound& sound){
 		startMillis = millis();
 		task.start(1, 0);
 	}else{
+		mut.lock();
 		queued = sound;
+		mut.unlock();
 	}
 }
 
@@ -33,13 +37,16 @@ void AudioSystem::stop(){
 
 void AudioSystem::playbackFunc(){
 	while(chirpID < current.size()){
+		mut.lock();
 		if(!queued.empty()){
 			current = queued;
 			queued.clear();
 			chirpID = 0;
 			startMillis = millis();
+			mut.unlock();
 			continue;
 		}
+		mut.unlock();
 
 		currentMillis = millis() - startMillis;
 
@@ -54,8 +61,10 @@ void AudioSystem::playbackFunc(){
 		chirpID++;
 
 		if(chirpID >= current.size()){
+			mut.lock();
 			current = queued;
 			queued.clear();
+			mut.unlock();
 			chirpID = 0;
 		}
 	}

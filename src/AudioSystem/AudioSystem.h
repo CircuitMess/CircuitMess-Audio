@@ -3,6 +3,7 @@
 
 #include "Chirp.hpp"
 #include <Util/Task.h>
+#include <Sync/Mutex.h>
 
 /**
  * Simple Audio system designed for short SFX played on a simple piezo buzzer.
@@ -23,6 +24,8 @@ private:
 	Task task;
 	Sound queued;
 	Sound current;
+
+	Mutex mut;
 
 	void playbackFunc();
 	volatile uint32_t startMillis = 0;
