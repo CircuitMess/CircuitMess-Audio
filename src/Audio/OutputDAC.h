@@ -15,7 +15,8 @@ public:
 	void init() override;
 	void deinit() override;
 
-	static void IRAM_ATTR timerInterrupt();
+	static void IRAM_ATTR timerInterruptCH1();
+	static void IRAM_ATTR timerInterruptCH2();
 
 protected:
 	void output(size_t numBytes) override;
