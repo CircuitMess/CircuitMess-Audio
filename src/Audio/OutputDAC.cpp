@@ -3,7 +3,7 @@
 #include "../PerfMon.h"
 #include <soc/sens_reg.h>
 
-const char* tag = "CMA_OutputDAC";
+static const char* tag = "CMA_OutputDAC";
 #define TIMER DAC_TIMER
 
 typedef struct {
