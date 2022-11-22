@@ -76,8 +76,10 @@ OutputDAC* output = nullptr;
 
 OutputDAC::OutputDAC(int pin_out, int pin_sd) : Output(false), PIN_OUT(pin_out), PIN_SD(pin_sd), buffer(BUFFER_SIZE * DAC_BUFFERS, true){
 
-	pinMode(PIN_SD, OUTPUT);
-	digitalWrite(PIN_SD, HIGH);
+	if(PIN_SD != -1){
+		pinMode(PIN_SD, OUTPUT);
+		digitalWrite(PIN_SD, HIGH);
+	}
 
 	for(int i = 0; i < DAC_BUFFERS; i++){
 		outputBuffer[i] = static_cast<uint8_t*>(malloc(BUFFER_SIZE / BYTES_PER_SAMPLE));
