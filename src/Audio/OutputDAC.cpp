@@ -3,6 +3,7 @@
 #include "../PerfMon.h"
 #include <soc/sens_reg.h>
 
+static const char* tag = "CMA_OutputDAC";
 #define TIMER DAC_TIMER
 
 typedef struct {
@@ -74,6 +75,17 @@ namespace CMA {
 OutputDAC* output = nullptr;
 
 OutputDAC::OutputDAC(int pin_out, int pin_sd) : Output(false), PIN_OUT(pin_out), PIN_SD(pin_sd), buffer(BUFFER_SIZE * DAC_BUFFERS, true){
+	if(PIN_OUT != 25 && PIN_OUT != 26){
+		PIN_OUT = -1;
+		ESP_LOGE(tag, "Invalid output pin specified, received: %d, expected 25 for DAC1 or 26 for DAC2");
+		return;
+	}
+
+	if(PIN_SD != -1){
+		pinMode(PIN_SD, OUTPUT);
+		digitalWrite(PIN_SD, HIGH);
+	}
+
 	for(int i = 0; i < DAC_BUFFERS; i++){
 		outputBuffer[i] = static_cast<uint8_t*>(malloc(BUFFER_SIZE / BYTES_PER_SAMPLE));
 	}
@@ -85,20 +97,31 @@ OutputDAC::OutputDAC(int pin_out, int pin_sd) : Output(false), PIN_OUT(pin_out),
 	}
 
 	timer = timerBegin(TIMER, 80, true);
-	timerAttachInterrupt(timer, &timerInterrupt, true);    // P3= edge triggered
+	if(PIN_OUT == 25){
+		timerAttachInterrupt(timer, &timerInterruptCH1, true);    // P3= edge triggered
+	}else if(PIN_OUT == 26){
+		timerAttachInterrupt(timer, &timerInterruptCH2, true);    // P3= edge triggered
+	}
 	dis(timer);
 }
 
 OutputDAC::~OutputDAC(){
+	if(::output == this){
+		::output = nullptr;
+	}
+
+	if(PIN_OUT == -1) return;
+
 	dis(timer);
 	timerEnd(timer);
-	::output = nullptr;
 	for(int i = 0; i < DAC_BUFFERS; i++){
 		free(outputBuffer[i]);
 	}
 }
 
 void OutputDAC::output(size_t numSamples){
+	if(PIN_OUT == -1) return;
+
 	size_t size = numSamples * BYTES_PER_SAMPLE * NUM_CHANNELS;
 
 	Profiler.start("Buffer wait");
@@ -156,7 +179,7 @@ void OutputDAC::transferBuffer(){
 	bufferStatus[target] = true;
 }
 
-void IRAM_ATTR OutputDAC::timerInterrupt(){
+void IRAM_ATTR OutputDAC::timerInterruptCH1(){
 	OutputDAC* output = ::output;
 	if(output == nullptr || output->currentSample == BUFFER_SAMPLES) return;
 
@@ -187,7 +210,40 @@ void IRAM_ATTR OutputDAC::timerInterrupt(){
 	}
 }
 
+void IRAM_ATTR OutputDAC::timerInterruptCH2(){
+	OutputDAC* output = ::output;
+	if(output == nullptr || output->currentSample == BUFFER_SAMPLES) return;
+
+	uint8_t current = output->currentBuffer;
+	if(!output->bufferStatus[current]) return;
+
+	/*double value = (double) output->outputBuffer[current][output->currentSample]; // [-1, 1]
+	//value /= 3.0; // counter voltage amplification
+	//value /= 3.0; // make sure we don't draw too much current
+	value *= (double) output->getGain(); // apply volume [-1, 1]
+	value = value / 257.0 + 127; // bring to [0, 1]
+	value = value > 255 ? 255 : value; // clipping
+	value = value < 0 ? 0 : value; // clipping*/
+
+	//dacWrite(output->PIN_OUT, (uint8_t) value);
+	// For pin 26
+	CLEAR_PERI_REG_MASK(SENS_SAR_DAC_CTRL1_REG, SENS_SW_TONE_EN);
+	CLEAR_PERI_REG_MASK(SENS_SAR_DAC_CTRL2_REG, SENS_DAC_CW_EN2_M);
+	SET_PERI_REG_BITS(RTC_IO_PAD_DAC2_REG, RTC_IO_PDAC2_DAC, output->outputBuffer[current][output->currentSample], RTC_IO_PDAC2_DAC_S);
+	SET_PERI_REG_MASK(RTC_IO_PAD_DAC2_REG, RTC_IO_PDAC2_XPD_DAC | RTC_IO_PDAC2_DAC_XPD_FORCE);
+
+	output->currentSample++;
+
+	if(output->currentSample == output->bufferSamples[current]){
+		output->currentBuffer = (output->currentBuffer + 1) % DAC_BUFFERS;
+		output->bufferStatus[current] = false;
+		output->currentSample = 0;
+	}
+}
+
 void OutputDAC::init(){
+	if(PIN_OUT == -1) return;
+
 	if(PIN_SD != -1){
 		digitalWrite(PIN_SD, LOW);
 	}
@@ -210,6 +266,8 @@ void OutputDAC::init(){
 }
 
 void OutputDAC::deinit(){
+	if(PIN_OUT == -1) return;
+
 	dis(timer);
 	// ::output = nullptr;
 
@@ -219,4 +277,5 @@ void OutputDAC::deinit(){
 
 	bufferStatus[currentBuffer] = 0;
 	currentSample = BUFFER_SAMPLES;
+	::output = nullptr;
 }
