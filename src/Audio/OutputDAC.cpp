@@ -75,6 +75,11 @@ namespace CMA {
 OutputDAC* output = nullptr;
 
 OutputDAC::OutputDAC(int pin_out, int pin_sd) : Output(false), PIN_OUT(pin_out), PIN_SD(pin_sd), buffer(BUFFER_SIZE * DAC_BUFFERS, true){
+	if(PIN_OUT != 25 && PIN_OUT != 26){
+		PIN_OUT = -1;
+		ESP_LOGE(tag, "Invalid output pin specified, received: %d, expected 25 for DAC1 or 26 for DAC2");
+		return;
+	}
 
 	if(PIN_SD != -1){
 		pinMode(PIN_SD, OUTPUT);
@@ -92,28 +97,31 @@ OutputDAC::OutputDAC(int pin_out, int pin_sd) : Output(false), PIN_OUT(pin_out),
 	}
 
 	timer = timerBegin(TIMER, 80, true);
-	void (*func)();
-	if(pin_out == 25){
-		func = &timerInterruptCH1;
-	}else if(pin_out == 26){
-		func = &timerInterruptCH2;
-	}else{
-		ESP_LOGE(tag, "Invalid output pin specified, received: %d, expected 25 for DAC1 or 26 for DAC2";)
+	if(PIN_OUT == 25){
+		timerAttachInterrupt(timer, &timerInterruptCH1, true);    // P3= edge triggered
+	}else if(PIN_OUT == 26){
+		timerAttachInterrupt(timer, &timerInterruptCH2, true);    // P3= edge triggered
 	}
-	timerAttachInterrupt(timer, func, true);    // P3= edge triggered
 	dis(timer);
 }
 
 OutputDAC::~OutputDAC(){
+	if(::output == this){
+		::output = nullptr;
+	}
+
+	if(PIN_OUT == -1) return;
+
 	dis(timer);
 	timerEnd(timer);
-	::output = nullptr;
 	for(int i = 0; i < DAC_BUFFERS; i++){
 		free(outputBuffer[i]);
 	}
 }
 
 void OutputDAC::output(size_t numSamples){
+	if(PIN_OUT == -1) return;
+
 	size_t size = numSamples * BYTES_PER_SAMPLE * NUM_CHANNELS;
 
 	Profiler.start("Buffer wait");
@@ -234,6 +242,8 @@ void IRAM_ATTR OutputDAC::timerInterruptCH2(){
 }
 
 void OutputDAC::init(){
+	if(PIN_OUT == -1) return;
+
 	if(PIN_SD != -1){
 		digitalWrite(PIN_SD, LOW);
 	}
@@ -256,6 +266,8 @@ void OutputDAC::init(){
 }
 
 void OutputDAC::deinit(){
+	if(PIN_OUT == -1) return;
+
 	dis(timer);
 	// ::output = nullptr;
 
@@ -265,4 +277,5 @@ void OutputDAC::deinit(){
 
 	bufferStatus[currentBuffer] = 0;
 	currentSample = BUFFER_SAMPLES;
+	::output = nullptr;
 }
