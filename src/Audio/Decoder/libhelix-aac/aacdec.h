@@ -78,6 +78,8 @@
 #define USE_DEFAULT_STDLIB
 #endif
 
+#include "../../../Setup.hpp"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -89,7 +91,7 @@ extern "C" {
  *       0 bits =    0 bytes per CCE-D (uses bits from the SCE/CPE/CCE-I it is coupled to)
  */
 #ifndef AAC_MAX_NCHANS				/* if max channels isn't set in makefile, */
-#define AAC_MAX_NCHANS		2		/* set to default max number of channels  */
+#define AAC_MAX_NCHANS		NUM_CHANNELS		/* set to default max number of channels  */
 #endif
 #define AAC_MAX_NSAMPS		1024
 #define AAC_MAINBUF_SIZE	(768 * AAC_MAX_NCHANS)
