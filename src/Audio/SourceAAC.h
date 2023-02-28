@@ -38,7 +38,7 @@ private:
 
 	DataBuffer fillBuffer;
 	DataBuffer dataBuffer;
-	void refill();
+	size_t refill();
 
 	HAACDecoder hAACDecoder = nullptr;
 

@@ -61,7 +61,7 @@ size_t SourceAAC::generate(int16_t* outBuffer){
 //		}
 		if(repeat){
 			ds.seek(0);
-			refill();
+			if(!refill()) return 0;
 		}else{
 			return 0;
 		}
@@ -70,7 +70,7 @@ size_t SourceAAC::generate(int16_t* outBuffer){
 	while(dataBuffer.readAvailable() < BUFFER_SIZE){
 
 		if(fillBuffer.readAvailable() < AAC_DECODE_MIN_INPUT){
-			refill();
+			if(!refill()) return 0;
 		}
 
 		auto data = const_cast<uint8_t*>(fillBuffer.readData());
@@ -120,10 +120,11 @@ size_t SourceAAC::generate(int16_t* outBuffer){
 	return samples;
 }
 
-void SourceAAC::refill(){
+size_t SourceAAC::refill(){
 	size_t size = min(fillBuffer.writeAvailable(), ds.available());
 	size = ds.read(fillBuffer.writeData(), size);
 	fillBuffer.writeMove(size);
+	return size;
 }
 
 uint16_t SourceAAC::getDuration(){
